@@ -10,12 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/pro-chat": "^1.14.0",
+    "@ant-design/pro-components": "^2.7.9",
+    "@ant-design/pro-form": "^2.27.0",
+    "@ant-design/pro-layout": "^7.19.7",
     "antd": "^5.18.0",
+    "antd-style": "^3.6.2",
     "axios": "^1.7.2",
+    "d3": "^7.9.0",
     "echarts": "^5.5.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.23.1"
+    "react-router-dom": "^6.23.1",
+    "react-wordcloud": "^1.2.7"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

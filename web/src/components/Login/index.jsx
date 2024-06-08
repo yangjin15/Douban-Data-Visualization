@@ -14,6 +14,7 @@ const Login = () => {
       .then((response) => {
         message.success("Login successful");
         navigate("/");
+        localStorage.setItem("username", "admin");
       })
       .catch((error) => {
         message.error("Invalid username or password");
