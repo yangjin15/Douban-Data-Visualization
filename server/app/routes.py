@@ -1,9 +1,7 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import mysql
-import requests
 from flask import jsonify, request, Response, current_app
-import json
 import os
 from flask_mysqldb import MySQL
 from werkzeug.utils import secure_filename
