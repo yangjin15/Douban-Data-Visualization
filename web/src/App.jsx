@@ -1,5 +1,11 @@
-import React from "react";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Link,
+  Navigate,
+} from "react-router-dom";
 import { Layout, Menu, Dropdown, Button } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import Books from "./components/Books";
@@ -14,17 +20,35 @@ import ChatBot from "./components/ChatBot";
 import Dialogue from "./components/Dialogue";
 import Profile from "./components/Profile";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content, Sider } = Layout;
 
 const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
+
   const username = localStorage.getItem("username") || "Guest";
 
   const handleMenuClick = ({ key }) => {
     if (key === "profile") {
       window.location.href = "/profile";
     } else if (key === "logout") {
-      localStorage.removeItem("username");
-      window.location.href = "/login";
+      handleLogout();
     }
   };
 
@@ -65,8 +89,11 @@ const App = () => {
               defaultSelectedKeys={["1"]}
               style={{ height: "100%", borderRight: 0 }}
             >
+              <Menu.Item key="1">
+                <Link to="/">图书数据管理</Link>
+              </Menu.Item>
               <Menu.SubMenu key="sub1" title="数据分析">
-                <Menu.Item key="1">
+                <Menu.Item key="0">
                   <Link to="/books-by-decade">数量面积图</Link>
                 </Menu.Item>
                 <Menu.Item key="2">
@@ -91,25 +118,79 @@ const App = () => {
             <Content style={{ padding: "0 50px", marginTop: 16 }}>
               <div className="site-layout-content">
                 <Routes>
-                  <Route path="/" element={<Books />} />
+                  <Route
+                    path="/login"
+                    element={<Login onLogin={handleLogin} />}
+                  />
                   <Route path="/register" element={<Register />} />
-                  <Route path="/login" element={<Login />} />
+                  <Route
+                    path="/"
+                    element={
+                      isAuthenticated ? <Books /> : <Navigate to="/login" />
+                    }
+                  />
                   <Route
                     path="/books-by-decade"
-                    element={<BooksByDecadeChart />}
+                    element={
+                      isAuthenticated ? (
+                        <BooksByDecadeChart />
+                      ) : (
+                        <Navigate to="/login" />
+                      )
+                    }
                   />
-                  <Route path="/books-by-year" element={<BooksByYearChart />} />
+                  <Route
+                    path="/books-by-year"
+                    element={
+                      isAuthenticated ? (
+                        <BooksByYearChart />
+                      ) : (
+                        <Navigate to="/login" />
+                      )
+                    }
+                  />
                   <Route
                     path="/books-by-publisher"
-                    element={<BooksByPublisherChart />}
+                    element={
+                      isAuthenticated ? (
+                        <BooksByPublisherChart />
+                      ) : (
+                        <Navigate to="/login" />
+                      )
+                    }
                   />
                   <Route
                     path="/scatter-plot-by-year-and-rating"
-                    element={<ScatterPlotByYearAndRating />}
+                    element={
+                      isAuthenticated ? (
+                        <ScatterPlotByYearAndRating />
+                      ) : (
+                        <Navigate to="/login" />
+                      )
+                    }
                   />
-                  <Route path="/word-cloud" element={<WordCloudComponent />} />
-                  <Route path="/dialogue" element={<Dialogue />} />
-                  <Route path="/profile" element={<Profile />} />
+                  <Route
+                    path="/word-cloud"
+                    element={
+                      isAuthenticated ? (
+                        <WordCloudComponent />
+                      ) : (
+                        <Navigate to="/login" />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/dialogue"
+                    element={
+                      isAuthenticated ? <Dialogue /> : <Navigate to="/login" />
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      isAuthenticated ? <Profile /> : <Navigate to="/login" />
+                    }
+                  />
                 </Routes>
               </div>
             </Content>

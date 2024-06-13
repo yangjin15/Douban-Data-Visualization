@@ -45,7 +45,8 @@ def login():
     cur.close()
 
     if user and check_password_hash(user['password'], password):
-        return jsonify({"message": "Login successful"}), 200
+        token = 'fake-jwt-token'  # In a real app, generate a JWT token
+        return jsonify({"message": "Login successful", "token": token}), 200
     else:
         return jsonify({"message": "Invalid username or password"}), 401
     
@@ -113,32 +114,32 @@ def get_book_summaries():
     cur.close()
     return jsonify([item['summary'] for item in summaries])
 
-@main.route('/chat', methods=['POST'])
-def chat():
-    data = request.json
-    interviewee_message = data.get('Interviewee_message')
+# @main.route('/chat', methods=['POST'])
+# def chat():
+#     data = request.json
+#     interviewee_message = data.get('Interviewee_message')
 
-    # Create the prompt based on the messages
-    prompt = interviewee_message
+#     # Create the prompt based on the messages
+#     prompt = interviewee_message
 
-    # Call the LLaMA API
-    llama_response = requests.post('http://localhost:11434/api/generate', json={
-        "model": "llama3",
-        "prompt": prompt,
-        "stream": True
-    }, stream=True)
+#     # Call the LLaMA API
+#     llama_response = requests.post('http://localhost:11434/api/generate', json={
+#         "model": "llama3",
+#         "prompt": prompt,
+#         "stream": True
+#     }, stream=True)
 
-    def generate():
-        for line in llama_response.iter_lines():
-            if line:
-                decoded_line = line.decode('utf-8')
-                json_response = json.loads(decoded_line)
-                if 'response' in json_response:
-                    yield f"data: {json_response['response']}\n\n"
-                if json_response.get('done'):
-                    break
+#     def generate():
+#         for line in llama_response.iter_lines():
+#             if line:
+#                 decoded_line = line.decode('utf-8')
+#                 json_response = json.loads(decoded_line)
+#                 if 'response' in json_response:
+#                     yield f"data: {json_response['response']}\n\n"
+#                 if json_response.get('done'):
+#                     break
 
-    return Response(generate(), mimetype='text/event-stream')
+#     return Response(generate(), mimetype='text/event-stream')
 
 @main.route('/profile', methods=['POST'])
 def update_profile():
@@ -178,3 +179,48 @@ def upload_avatar():
         file.save(filepath)
         return jsonify({'url': filepath})
     return jsonify({'error': 'File upload failed'}), 500
+
+# 新增图书
+@main.route('/books', methods=['POST'])
+def add_book():
+    data = request.get_json()
+    title = data['title']
+    author = data['author']
+    publisher = data.get('publisher', '')
+    publish_date = data.get('publish_date', '')
+    rating = data.get('rating', 0.0)
+    review = data.get('review', '')
+
+    cur = mysql.connection.cursor()
+    cur.execute('INSERT INTO books (title, author, publisher, publish_date, rating, review) VALUES (%s, %s, %s, %s, %s, %s)',
+                (title, author, publisher, publish_date, rating, review))
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"message": "Book added successfully"}), 201
+
+# 更新图书
+@main.route('/books/<int:id>', methods=['PUT'])
+def update_book(id):
+    data = request.get_json()
+    title = data.get('title')
+    author = data.get('author')
+    publisher = data.get('publisher')
+    publish_date = data.get('publish_date')
+    rating = data.get('rating')
+    review = data.get('review')
+
+    cur = mysql.connection.cursor()
+    cur.execute('UPDATE books SET title = %s, author = %s, publisher = %s, publish_date = %s, rating = %s, review = %s WHERE id = %s',
+                (title, author, publisher, publish_date, rating, review, id))
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"message": "Book updated successfully"}), 200
+
+# 删除图书
+@main.route('/books/<int:id>', methods=['DELETE'])
+def delete_book(id):
+    cur = mysql.connection.cursor()
+    cur.execute('DELETE FROM books WHERE id = %s', (id,))
+    mysql.connection.commit()
+    cur.close()
+    return jsonify({"message": "Book deleted successfully"}), 200

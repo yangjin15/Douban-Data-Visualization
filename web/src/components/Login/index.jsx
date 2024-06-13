@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Form, Input, Button, message } from "antd";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
-const Login = () => {
+const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -13,8 +13,10 @@ const Login = () => {
       .post("http://localhost:5000/login", values)
       .then((response) => {
         message.success("Login successful");
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("username", values.username);
+        onLogin();
         navigate("/");
-        localStorage.setItem("username", "admin");
       })
       .catch((error) => {
         message.error("Invalid username or password");
@@ -49,6 +51,9 @@ const Login = () => {
           Login
         </Button>
       </Form.Item>
+      <div style={{ textAlign: "center" }}>
+        Don't have an account? <Link to="/register">Register</Link>
+      </div>
     </Form>
   );
 };
