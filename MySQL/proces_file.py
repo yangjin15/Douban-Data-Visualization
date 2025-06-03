@@ -37,7 +37,7 @@ df.fillna(value={
 conn = mysql.connector.connect(
     host='localhost',
     user='root',
-    password='yj811025',
+    password='123456',
     database='douban_books_db'
 )
 cursor = conn.cursor()
